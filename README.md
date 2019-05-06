@@ -14,8 +14,6 @@ There are 4 kinds of GC roots in Java:
 ### [Local Variables Example 1](src/main/java/com/nobodyhub/learn/gc/LocalVarExample1.java)
 This example shows how the GC treats the not-null local variable.
 ```java
-package com.nobodyhub.learn.gc;
-
 public class LocalVarExample1 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
@@ -29,20 +27,18 @@ public class LocalVarExample1 {
 ```
 The output will be:
 ```log
-[GC [PSYoungGen: 66928K->51488K(458752K)] 66928K->51488K(983040K), 0.0351942 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51488K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51488K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0321382 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51760K(458752K)] 66928K->51768K(983040K), 0.0335928 secs] [Times: user=0.01 sys=0.02, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51760K->0K(458752K)] [ParOldGen: 8K->51609K(524288K)] 51768K->51609K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0256327 secs] [Times: user=0.02 sys=0.03, real=0.02 secs] 
 GC Completed!
 ```
 
 * In the `Full GC`, `e` was remvoed from `PSYoungGen`, resulting in decrease of `PSYoungGen`.
-* Instead of being garbage-collected, the object was moved to `PSOldGen` since there is almost no change in the overall memory(10496K->10398K).
+* Instead of being garbage-collected, the object was moved to `ParOldGen` since there is almost no change in the overall memory(10496K->10398K).
 
 ### [Local Variables Example 2](src/main/java/com/nobodyhub/learn/gc/LocalVarExample2.java)
 This example shows how the GC treats the null local variable.
 
 ```java
-package com.nobodyhub.learn.gc;
-
 public class LocalVarExample2 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
@@ -57,19 +53,17 @@ public class LocalVarExample2 {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 66928K->256K(458752K)] 66928K->256K(983040K), 0.0006598 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 256K->0K(458752K)] [PSOldGen: 0K->182K(524288K)] 256K->182K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0041840 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->512K(458752K)] 66928K->520K(983040K), 0.0009957 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 512K->0K(458752K)] [ParOldGen: 8K->409K(524288K)] 520K->409K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0037865 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
 GC Completed!
 ```
 
-Instead of moving to `PSOldGen`, `e` was removed directly.
+Instead of moving to `ParOldGen`, `e` was removed directly.
 
 ### [Local Variables Example 3](src/main/java/com/nobodyhub/learn/gc/LocalVarExample3.java)
 This example shows how GC treats the local variable in the method call.
 
 ```java
-package com.nobodyhub.learn.gc;
-
 public class LocalVarExample3 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
@@ -89,28 +83,26 @@ public class LocalVarExample3 {
 ```
 The output will be:
 ```log
-[GC [PSYoungGen: 66928K->51488K(458752K)] 66928K->51488K(983040K), 0.0282356 secs] [Times: user=0.01 sys=0.00, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51488K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51488K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0314269 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51680K(458752K)] 66928K->51688K(983040K), 0.0401186 secs] [Times: user=0.00 sys=0.03, real=0.04 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51680K->0K(458752K)] [ParOldGen: 8K->51609K(524288K)] 51688K->51609K(983040K), [Metaspace: 3336K->3336K(1056768K)], 0.0379273 secs] [Times: user=0.02 sys=0.00, real=0.04 secs] 
 1st GC Completed!
-[GC [PSYoungGen: 23593K->32K(458752K)] 74975K->51414K(983040K), 0.0018599 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 32K->0K(458752K)] [PSOldGen: 51382K->182K(524288K)] 51414K->182K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0044902 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 7864K->32K(458752K)] 59473K->51641K(983040K), 0.0008641 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 32K->0K(458752K)] [ParOldGen: 51609K->405K(524288K)] 51641K->405K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0043024 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
 2nd GC Completed!
 ```
 
-* In the 1st GC, `e` was moved from `PSYoungGen` to `PSOldGen`.
-* In the 2nd GC, `e` was not held by any object and removed from `PSOldGen` because no method referred it any more.
+* In the 1st GC, `e` was moved from `PSYoungGen` to `ParOldGen`.
+* In the 2nd GC, `e` was not held by any object and removed from `ParOldGen` because no method referred it any more.
 
 ### [Large Object Example](src/main/java/com/nobodyhub/learn/gc/LargeObjectExample.java)
 The example show how GC deal with big object.
 ```java
-package com.nobodyhub.learn.gc;
-
 public class LargeObjectExample {
-    private int _50MB = 500 * 1024 * 1024;
-    private byte[] memory = new byte[_50MB];
+    private int _500MB = 500 * 1024 * 1024;
+    private byte[] memory = new byte[_500MB];
 
     public static void main(String[] args) {
-        LocalVarExample1 e = new LocalVarExample1();
+        LargeObjectExample e = new LargeObjectExample();
         System.gc();
         System.out.println("GC Completed!");
     }
@@ -118,25 +110,23 @@ public class LargeObjectExample {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 15728K->304K(458752K)] 527728K->512304K(983040K), 0.0009057 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 304K->0K(458752K)] [PSOldGen: 512000K->512182K(524288K)] 512304K->512182K(983040K) [PSPermGen: 3377K->3377K(21248K)], 0.0042538 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 15728K->512K(458752K)] 527728K->512520K(983040K), 0.0027282 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 512K->0K(458752K)] [ParOldGen: 512008K->512409K(524288K)] 512520K->512409K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0138663 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 GC Completed!
 ```
-The large object will be directly created in `PSOldGen`.
+The large object will be directly created in `ParOldGen`.
 
 ### [Class Variables Example 1](src/main/java/com/nobodyhub/learn/gc/ClassVarExample1.java)
 This example shows how the GC treat static variable of class.
 ```java
-package com.nobodyhub.learn.gc;
-
-public class StaticVarExample {
+public class ClassVarExample1 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
-    private static StaticVarExample instance;
+    private static ClassVarExample1 instance;
 
     public static void main(String[] args) {
-        StaticVarExample e = new StaticVarExample();
-        e.instance = new StaticVarExample();
+        ClassVarExample1 e = new ClassVarExample1();
+        e.instance = new ClassVarExample1();
         e = null;
         System.gc();
         System.out.println("GC Completed!");
@@ -145,27 +135,25 @@ public class StaticVarExample {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 118128K->51504K(458752K)] 118128K->51504K(983040K), 0.0308586 secs] [Times: user=0.00 sys=0.02, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51504K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51504K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0321588 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
-GC Completed! 
+[GC (System.gc()) [PSYoungGen: 118128K->51712K(458752K)] 118128K->51712K(983040K), 0.0477359 secs] [Times: user=0.00 sys=0.03, real=0.05 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51712K->0K(458752K)] [ParOldGen: 0K->51609K(524288K)] 51712K->51609K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0596853 secs] [Times: user=0.03 sys=0.03, real=0.06 secs] 
+GC Completed!
 ```
 
 Because the `e` object was set to null, it was garbage-collected during the minor `GC`.
-However, the object held by `StaticVarExample.instance` was not garbage-collected and moved to `PSOldGen`
+However, the object held by `StaticVarExample.instance` was not garbage-collected and moved to `ParOldGen`
 
 ### [Class Variables Example 2](src/main/java/com/nobodyhub/learn/gc/ClassVarExample2.java)
 This example shows how the GC treat non-static variable of class.
 ```java
-package com.nobodyhub.learn.gc;
-
-public class StaticVarExample {
+public class ClassVarExample2 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
-    private StaticVarExample instance;
+    private ClassVarExample2 instance;
 
     public static void main(String[] args) {
-        StaticVarExample e = new StaticVarExample();
-        e.instance = new StaticVarExample();
+        ClassVarExample2 e = new ClassVarExample2();
+        e.instance = new ClassVarExample2();
         e = null;
         System.gc();
         System.out.println("GC Completed!");
@@ -174,8 +162,8 @@ public class StaticVarExample {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 118128K->288K(458752K)] 118128K->288K(983040K), 0.0005793 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 288K->0K(458752K)] [PSOldGen: 0K->182K(524288K)] 288K->182K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0046023 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 118128K->528K(458752K)] 118128K->536K(983040K), 0.0008932 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 528K->0K(458752K)] [ParOldGen: 8K->409K(524288K)] 536K->409K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0048655 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] 
 GC Completed!
 ```
 Both `e` and `e.instance` were garbaged-collected in the minor `GC`.
@@ -183,8 +171,6 @@ Both `e` and `e.instance` were garbaged-collected in the minor `GC`.
 ### [Block Variables Example 1](src/main/java/com/nobodyhub/learn/gc/BlockVarExample1.java)
 This example shows how the GC treat variable in the block.
 ```java
-package com.nobodyhub.learn.gc;
-
 public class BlockVarExample1 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
@@ -202,11 +188,11 @@ public class BlockVarExample1 {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 66928K->51488K(458752K)] 66928K->51488K(983040K), 0.0280569 secs] [Times: user=0.02 sys=0.02, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51488K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51488K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0316107 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51680K(458752K)] 66928K->51688K(983040K), 0.0306643 secs] [Times: user=0.03 sys=0.02, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51680K->0K(458752K)] [ParOldGen: 8K->51609K(524288K)] 51688K->51609K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0157436 secs] [Times: user=0.02 sys=0.03, real=0.02 secs] 
 1st GC Completed!
-[GC [PSYoungGen: 23593K->32K(458752K)] 74975K->51414K(983040K), 0.0002750 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 32K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 51414K->51382K(983040K) [PSPermGen: 3378K->3378K(21248K)], 0.0040275 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 7864K->64K(458752K)] 59473K->51673K(983040K), 0.0006379 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 64K->0K(458752K)] [ParOldGen: 51609K->51605K(524288K)] 51673K->51605K(983040K), [Metaspace: 3340K->3340K(1056768K)], 0.0122282 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 2nd GC Completed!
 ```
 Even though `e` is not accessable from outside block, it is not garbage-colleceted.
@@ -214,8 +200,6 @@ Even though `e` is not accessable from outside block, it is not garbage-collecet
 ### [Block Variables Example 2](src/main/java/com/nobodyhub/learn/gc/BlockVarExample2.java)
 This example shows how the GC treat variable in the block after set null.
 ```java
-package com.nobodyhub.learn.gc;
-
 public class BlockVarExample2 {
     private int _50MB = 50 * 1024 * 1024;
     private byte[] memory = new byte[_50MB];
@@ -234,11 +218,11 @@ public class BlockVarExample2 {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 66928K->288K(458752K)] 66928K->288K(983040K), 0.0008514 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 288K->0K(458752K)] [PSOldGen: 0K->182K(524288K)] 288K->182K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0044942 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->528K(458752K)] 66928K->536K(983040K), 0.0013852 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 528K->0K(458752K)] [ParOldGen: 8K->409K(524288K)] 536K->409K(983040K), [Metaspace: 3338K->3338K(1056768K)], 0.0036675 secs] [Times: user=0.05 sys=0.00, real=0.00 secs] 
 1st GC Completed!
-[GC [PSYoungGen: 23593K->32K(458752K)] 23775K->214K(983040K), 0.0001470 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 32K->0K(458752K)] [PSOldGen: 182K->182K(524288K)] 214K->182K(983040K) [PSPermGen: 3378K->3378K(21248K)], 0.0039821 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 7864K->64K(458752K)] 8273K->473K(983040K), 0.0002775 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 64K->0K(458752K)] [ParOldGen: 409K->405K(524288K)] 473K->405K(983040K), [Metaspace: 3340K->3340K(1056768K)], 0.0032784 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
 2nd GC Completed!
 ```
 `e` was garbaged-collected in the minor `GC` in the 1st round.
@@ -275,37 +259,37 @@ public class BlockVarExample3 {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 66928K->51504K(458752K)] 66928K->51504K(983040K), 0.0312671 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51504K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51504K->51382K(983040K) [PSPermGen: 3376K->3376K(21248K)], 0.0315562 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51712K(458752K)] 66928K->51720K(983040K), 0.0345976 secs] [Times: user=0.02 sys=0.03, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51712K->0K(458752K)] [ParOldGen: 8K->51609K(524288K)] 51720K->51609K(983040K), [Metaspace: 3339K->3339K(1056768K)], 0.0164505 secs] [Times: user=0.03 sys=0.03, real=0.02 secs] 
 1 GC Completed!
 =======
-[GC [PSYoungGen: 74793K->51264K(458752K)] 126175K->102646K(983040K), 0.0281961 secs] [Times: user=0.05 sys=0.02, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->102583K(524288K)] 102646K->102583K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0313642 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+[GC (System.gc()) [PSYoungGen: 59064K->51264K(458752K)] 110673K->102873K(983040K), 0.0325766 secs] [Times: user=0.05 sys=0.02, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51264K->0K(458752K)] [ParOldGen: 51609K->102806K(524288K)] 102873K->102806K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0185342 secs] [Times: user=0.01 sys=0.00, real=0.02 secs] 
 2 GC Completed!
 =======
 Finalize: 1
-[GC [PSYoungGen: 66928K->51264K(458752K)] 169511K->153847K(983040K), 0.0069099 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 102583K->102582K(524288K)] 153847K->102582K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0167252 secs] [Times: user=0.01 sys=0.00, real=0.02 secs] 
-Finalize: 2
+[GC (System.gc()) [PSYoungGen: 66928K->51232K(458752K)] 169734K->154038K(983040K), 0.0075745 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51232K->0K(458752K)] [ParOldGen: 102806K->102805K(524288K)] 154038K->102805K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0131656 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 3 GC Completed!
 =======
-[GC [PSYoungGen: 66928K->51264K(458752K)] 169511K->153846K(983040K), 0.0169147 secs] [Times: user=0.00 sys=0.00, real=0.02 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 102582K->102582K(524288K)] 153846K->102582K(983040K) [PSPermGen: 3379K->3378K(21248K)], 0.0167975 secs] [Times: user=0.02 sys=0.00, real=0.02 secs] 
+Finalize: 2
+[GC (System.gc()) [PSYoungGen: 66928K->51264K(458752K)] 169734K->154069K(983040K), 0.0101373 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51264K->0K(458752K)] [ParOldGen: 102805K->102805K(524288K)] 154069K->102805K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0222437 secs] [Times: user=0.03 sys=0.00, real=0.02 secs] 
 4 GC Completed!
 =======
 Finalize: 3
 Final GC Started!=======
-[GC [PSYoungGen: 15728K->0K(458752K)] 118311K->102582K(983040K), 0.0066163 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 0K->0K(458752K)] [PSOldGen: 102582K->51382K(524288K)] 102582K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0106614 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) [PSYoungGen: 15728K->32K(458752K)] 118534K->102837K(983040K), 0.0016065 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 32K->0K(458752K)] [ParOldGen: 102805K->51605K(524288K)] 102837K->51605K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0067896 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
 Final GC Finished!=======
 Finalize: 4
 ```
 
 ||1st GC|2nd GC|3rd GC|4th GC|Final|
 |:-:|:----:|:----:|:----:|:----:|:---:|
-|Young|51504K->0K|51264K->0K|51264K->0K|51264K->0K|0K->0K|
-|Old|0K->51382K|51382K->102583K|102583K->102582K|102582K->102582K|102582K->51382K|
-|Total|51504K->51382K|102646K->102583K|153847K->102582K|153846K->102582K|102582K->51382K|
+|Young|51712K->0K|51264K->0K|51232K->0K|51264K->0K|32K->0K|
+|Old|8K->51609K|51609K->102806K|102806K->102805K|102805K->102805K|102805K->51605K|
+|Total|51720K->51609K|102873K->102806K|154038K->102805K|154069K->102805K|102837K->51605K|
 |Finalize|||1|2|3|
 
 ### [Block Variables Example 4](src/main/java/com/nobodyhub/learn/gc/BlockVarExample4.java)
@@ -328,8 +312,9 @@ public class BlockVarExample4 {
             System.gc();
             System.out.println(i++ + " GC Completed!");
         }
-        System.out.println("Final GC Started!");
+        System.out.println("Final GC Started!=======");
         System.gc();
+        System.out.println("Final GC Finished!=======");
     }
 
     @Override
@@ -340,48 +325,48 @@ public class BlockVarExample4 {
 ```
 This will output:
 ```log
-[GC [PSYoungGen: 66928K->51472K(458752K)] 66928K->51472K(983040K), 0.0285909 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51472K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51472K->51382K(983040K) [PSPermGen: 3376K->3376K(21248K)], 0.0349332 secs] [Times: user=0.02 sys=0.02, real=0.04 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51680K(458752K)] 66928K->51688K(983040K), 0.0321865 secs] [Times: user=0.01 sys=0.02, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51680K->0K(458752K)] [ParOldGen: 8K->51609K(524288K)] 51688K->51609K(983040K), [Metaspace: 3339K->3339K(1056768K)], 0.0204054 secs] [Times: user=0.00 sys=0.03, real=0.02 secs] 
 1 GC Completed!
 Finalize: 1
-[GC [PSYoungGen: 74793K->51264K(458752K)] 126175K->102646K(983040K), 0.0310401 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0097409 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51264K(458752K)] 118538K->102873K(983040K), 0.0317158 secs] [Times: user=0.00 sys=0.01, real=0.03 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51264K->0K(458752K)] [ParOldGen: 51609K->51606K(524288K)] 102873K->51606K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0096857 secs] [Times: user=0.05 sys=0.00, real=0.01 secs] 
 2 GC Completed!
 Finalize: 2
-[GC [PSYoungGen: 66928K->51264K(458752K)] 118311K->102646K(983040K), 0.0070423 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0093772 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51264K(458752K)] 118534K->102870K(983040K), 0.0103325 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51264K->0K(458752K)] [ParOldGen: 51606K->51605K(524288K)] 102870K->51605K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0110946 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 3 GC Completed!
 Finalize: 3
-[GC [PSYoungGen: 66928K->51264K(458752K)] 118311K->102646K(983040K), 0.0064819 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3378K(21248K)], 0.0103662 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) [PSYoungGen: 66928K->51264K(458752K)] 118534K->102869K(983040K), 0.0080958 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System.gc()) [PSYoungGen: 51264K->0K(458752K)] [ParOldGen: 51605K->51605K(524288K)] 102869K->51605K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0135345 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 Finalize: 4
 4 GC Completed!
 Final GC Started!=======
-[GC [PSYoungGen: 15728K->0K(458752K)] 67111K->51382K(983040K), 0.0003456 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 0K->0K(458752K)] [PSOldGen: 51382K->182K(524288K)] 51382K->182K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0037052 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) [PSYoungGen: 15728K->32K(458752K)] 67334K->51637K(983040K), 0.0007039 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 32K->0K(458752K)] [ParOldGen: 51605K->405K(524288K)] 51637K->405K(983040K), [Metaspace: 3341K->3341K(1056768K)], 0.0070613 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
 Final GC Finished!=======
 ```
 
 ||1st GC|2nd GC|3rd GC|4th GC|Final|
 |:-:|:----:|:----:|:----:|:----:|:---:|
-|Young|51504K->0K|51264K->0K|51264K->0K|51264K->0K|0K->0K|
-|Old|0K->51382K|51382K->102583K|102583K->102582K|102582K->102582K|102582K->51382K|
-|Total|51504K->51382K|102646K->102583K|153847K->102582K|153846K->102582K|102582K->51382K|
+|Young|51680K->0K|51264K->0K|51264K->0K|51264K->0K|32K->0K|
+|Old|8K->51609K|51609K->51606K|51606K->51605K|51605K->51605K|51605K->405K|
+|Total|51688K->51609|102873K->51606K|102870K->51605K|102869K->51605K|51637K->405K|
 |Finalize||1|2|3|4|
 
 ## Eligibility for Garbage Collection
 > VM Options for example in the section: `-Xms10m -Xmx10m -Xmn10m -XX:+PrintGCDetails`
 
 We will create object uisng following class:
-* Class A 
+* [Class A](src/main/java/com/nobodyhub/learn/gc/eligible/A.java) 
 ```java
 public class A {
 }
 ```
-* Class B
+* [Class B](src/main/java/com/nobodyhub/learn/gc/eligible/B.java) 
 ```java
 public class B {
-    private double[] array = new double[1 * 1000 * 1000];
+    private double[] array = new double[100 * 1000];
     private int name;
     private A a;
 
@@ -416,24 +401,24 @@ public class GcEligibleExample {
 This will output:
 ```log
 --- Loop Start ---
-[GC [PSYoungGen: 10884K->8100K(89600K)] 10884K->8100K(249344K), 0.0049886 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 8100K->0K(89600K)] [PSOldGen: 0K->7967K(159744K)] 8100K->7967K(249344K) [PSPermGen: 2993K->2993K(21248K)], 0.0079610 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
-[GC [PSYoungGen: 13956K->7908K(89600K)] 21923K->15875K(249344K), 0.0049166 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 7908K->0K(89600K)] [PSOldGen: 7967K->15780K(159744K)] 15875K->15780K(249344K) [PSPermGen: 3016K->3016K(21248K)], 0.0076384 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) --[PSYoungGen: 2559K->2559K(8704K)] 2559K->2559K(9216K), 0.0043492 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2559K->1192K(8704K)] [ParOldGen: 0K->0K(512K)] 2559K->1192K(9216K), [Metaspace: 3343K->3343K(1056768K)], 0.0048809 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) --[PSYoungGen: 2127K->2127K(8704K)] 2127K->2167K(9216K), 0.0053990 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2127K->1929K(8704K)] [ParOldGen: 40K->40K(512K)] 2167K->1969K(9216K), [Metaspace: 3344K->3344K(1056768K)], 0.0090495 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) --[PSYoungGen: 3017K->3017K(8704K)] 3057K->3145K(9216K), 0.0037696 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 3017K->2624K(8704K)] [ParOldGen: 128K->126K(512K)] 3145K->2750K(9216K), [Metaspace: 3344K->3344K(1056768K)], 0.0056003 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
 finalized: 1
-[GC [PSYoungGen: 12420K->7876K(89600K)] 28201K->23656K(249344K), 0.0012415 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 15780K->23595K(159744K)] 23656K->23595K(249344K) [PSPermGen: 3109K->3109K(21248K)], 0.0082479 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 finalized: 2
 
 ...
 
-[GC [PSYoungGen: 10884K->7876K(89600K)] 26758K->23750K(249344K), 0.0019427 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 15873K->23686K(159744K)] 23750K->23686K(249344K) [PSPermGen: 3956K->3956K(21248K)], 0.0065538 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[GC (System.gc()) --[PSYoungGen: 2634K->2634K(8704K)] 3141K->3141K(9216K), 0.0026652 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2634K->1743K(8704K)] [ParOldGen: 506K->506K(512K)] 3141K->2250K(9216K), [Metaspace: 3902K->3902K(1056768K)], 0.0058493 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
 finalized: 998
-[GC [PSYoungGen: 10884K->7876K(89600K)] 34571K->31562K(249344K), 0.0010782 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 23686K->15873K(159744K)] 31562K->15873K(249344K) [PSPermGen: 3956K->3956K(21248K)], 0.0069604 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-finalized: 999
+[GC (System.gc()) --[PSYoungGen: 2634K->2634K(8704K)] 3141K->3141K(9216K), 0.0009503 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2634K->1743K(8704K)] [ParOldGen: 506K->506K(512K)] 3141K->2250K(9216K), [Metaspace: 3902K->3902K(1056768K)], 0.0078499 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
 --- Loop End ---
+finalized: 999
 ```
 
 No `OutOfMemoryError` was thrown.
@@ -460,35 +445,44 @@ This will output:
 
 ```log
 --- Loop Start ---
-[GC [PSYoungGen: 10884K->8084K(89600K)] 10884K->8084K(249344K), 0.0053770 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
-[Full GC (System) [PSYoungGen: 8084K->0K(89600K)] [PSOldGen: 0K->7967K(159744K)] 8084K->7967K(249344K) [PSPermGen: 2994K->2994K(21248K)], 0.0080318 secs] [Times: user=0.00 sys=0.02, real=0.01 secs] 
-[GC [PSYoungGen: 13956K->7940K(89600K)] 21923K->15907K(249344K), 0.0042028 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC (System) [PSYoungGen: 7940K->0K(89600K)] [PSOldGen: 7967K->15782K(159744K)] 15907K->15782K(249344K) [PSPermGen: 3102K->3102K(21248K)], 0.0078200 secs] [Times: user=0.00 sys=0.01, real=0.01 secs] 
+[GC (System.gc()) --[PSYoungGen: 2559K->2559K(8704K)] 2559K->2567K(9216K), 0.0022721 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2559K->1159K(8704K)] [ParOldGen: 8K->1K(512K)] 2567K->1160K(9216K), [Metaspace: 3237K->3237K(1056768K)], 0.0030886 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (System.gc()) --[PSYoungGen: 2247K->2247K(8704K)] 2249K->2249K(9216K), 0.0008978 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 2247K->1936K(8704K)] [ParOldGen: 1K->1K(512K)] 2249K->1937K(9216K), [Metaspace: 3239K->3239K(1056768K)], 0.0043742 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
 
 ...
-
-[GC-- [PSYoungGen: 70313K->70313K(89600K)] 226747K->226747K(249344K), 0.0019197 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
-[Full GC [PSYoungGen: 70313K->70313K(89600K)] [PSOldGen: 156434K->156415K(159744K)] 226747K->226729K(249344K) [PSPermGen: 3383K->3374K(21248K)], 0.0268972 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+    
+[GC (System.gc()) --[PSYoungGen: 7192K->7192K(8704K)] 7453K->7461K(9216K), 0.0011419 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System.gc()) [PSYoungGen: 7192K->7150K(8704K)] [ParOldGen: 269K->261K(512K)] 7461K->7412K(9216K), [Metaspace: 3311K->3311K(1056768K)], 0.0056924 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[GC (Allocation Failure) --[PSYoungGen: 7150K->7150K(8704K)] 7412K->7428K(9216K), 0.0006211 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (Ergonomics) [PSYoungGen: 7150K->7150K(8704K)] [ParOldGen: 277K->261K(512K)] 7428K->7412K(9216K), [Metaspace: 3311K->3311K(1056768K)], 0.0029008 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC (Allocation Failure) --[PSYoungGen: 7150K->7150K(8704K)] 7412K->7468K(9216K), 0.0004578 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (Allocation Failure) [PSYoungGen: 7150K->7113K(8704K)] [ParOldGen: 317K->280K(512K)] 7468K->7394K(9216K), [Metaspace: 3311K->3311K(1056768K)], 0.0025574 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
 Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
-    at com.nobodyhub.learn.gc.eligible.GcNonEligibleExample$B.<init>(GcNonEligible.java from InputFileObject:11)
-    at com.nobodyhub.learn.gc.eligible.GcNonEligibleExample.main(GcNonEligible.java from InputFileObject:32)
+	at com.nobodyhub.learn.gc.eligible.B.<init>(B.java:5)
+	at com.nobodyhub.learn.gc.eligible.GcNonEligibleExample.main(GcNonEligibleExample.java:14)
+    
 ```
-`OutOfMemoryError` was thrown and promotion failure happens(@see [GC--](https://stackoverflow.com/questions/1174976/what-does-gc-mean-in-a-java-garbage-collection-log)).
+`OutOfMemoryError` was thrown and `GC (Allocation Failure)`(GC-- if prior to Java 8) happens.
+
+@see more
+* [GC--](https://stackoverflow.com/questions/1174976/what-does-gc-mean-in-a-java-garbage-collection-log)
+* [GC (Allocation Failure)](https://stackoverflow.com/questions/28342736/java-gc-allocation-failure)
 
 ## Format of GC Log
 Take the following output as an example:
 ```
-2019-05-06T12:05:42.735+0800: [Full GC (System) [PSYoungGen: 10512K->0K(458752K)] [PSOldGen: 0K->10396K(524288K)] 10512K->10396K(983040K) [PSPermGen: 3044K->3044K(21248K)], 0.0088350 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+2019-05-06T12:05:42.735+0800: [Full GC (System) [PSYoungGen: 10512K->0K(458752K)] [ParOldGen: 0K->10396K(524288K)] 10512K->10396K(983040K) [Metaspace: 3044K->3044K(21248K)], 0.0088350 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
 ```
 * **2019-05-06T12:05:42.735+0800**: timestamp at which GC ran(if we add option `-XX:+PrintGCDateStamps`).
 * **Full Gc**: Type of GC. It could be either `Full GC` or `GC`.
-* **[PSYoungGen: 10512K->0K(458752K)]**: After the GC ran, the young generation, space came down from 10512K to 0K. Total allocated young generation space is 458752K.
-* **[PSOldGen: 10396K->10396K(524288K)]**: After the GC ran the old generation space increased from 0K to 10396K and total allocated old generation space is 524288K.
+* **[PSYoungGen: 10512K->0K(458752K)]**: After the GC ran, the `young` generation, space came down from 10512K to 0K. Total allocated young generation space is 458752K.
+* **[ParOldGen: 10396K->10396K(524288K)]**: After the GC ran the `old` generation space increased from 0K to 10396K and total allocated old generation space is 524288K.
 * **10512K->10396K(983040K)**: After the GC ran, overall memory came down from 10512K to 10396K. Total allocated memory space is 983040K.
-* **[PSPermGen: 3044K->3044K(21248K)]**: After the GC ran, there was no change in the perm generation. In Java 8 onwards, it has been renamed to `Metaspace`().
+* **[Metaspace: 3044K->3044K(21248K)]**: After the GC ran, there was no change in the `perm` generation. In version prior to Java 8, it has been renamed to `PSPermGen`.
 * **0.0088350 secs**: Time the GC took to complete
 * **[Times: user=0.00 sys=0.00, real=0.01 secs]**: 3 types of time are reported for every single GC event. 
-    * **real**: is wall clock time (time from start to finish of the call). This is all elapsed time including time slices used by other processes and time the process spends blocked (for example if it is waiting for I/O to complete).
+    * **real**: is `wall clock` time (time from start to finish of the call). This is all elapsed time including time slices used by other processes and time the process spends blocked (for example if it is waiting for I/O to complete).
     * **user**: is the amount of CPU time spent in `user-mode code` (outside the kernel) within the process. This is only actual CPU time used in executing the process. Other processes, and the time the process spends blocked, do not count towards this figure.
     * **sys**: is the amount of CPU time spent in the `kernel` within the process. This means executing CPU time spent in system calls within the kernel, as opposed to library code, which is still running in user-space.
 
@@ -496,5 +490,5 @@ Take the following output as an example:
 
 
 ## Environment
-* Java: JDK 1.6.0_45
+* Java: JDK 1.8.0_181
 

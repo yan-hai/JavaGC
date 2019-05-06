@@ -2,7 +2,7 @@ package com.nobodyhub.learn.gc.eligible;
 
 
 public class B {
-    private double[] array = new double[1 * 1000 * 1000];
+    private double[] array = new double[100 * 1000];
     private int name;
     private A a;
 

@@ -5,7 +5,7 @@ public class LargeObjectExample {
     private byte[] memory = new byte[_500MB];
 
     public static void main(String[] args) {
-        LocalVarExample1 e = new LocalVarExample1();
+        LargeObjectExample e = new LargeObjectExample();
         System.gc();
         System.out.println("GC Completed!");
     }
