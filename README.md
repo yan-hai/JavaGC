@@ -1,6 +1,5 @@
 # Java GC Example
-Use examples to explain the Java GC process.
-
+Use examples to explain the Java GC.
 
 ## GC Root
 Garbage-collection roots are always reachable and will no be garbage-collected. 
@@ -32,8 +31,9 @@ The output will be:
 [Full GC (System) [PSYoungGen: 51488K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51488K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0321382 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
 GC Completed!
 ```
-In the `Full GC`, `e` was remvoed from `PSYoungGen`, resulting in decrease of `PSYoungGen`.
-Instead of being garbage-collected, the object was moved to `PSOldGen` since there is almost no change in the overall memory(10496K->10398K).
+
+* In the `Full GC`, `e` was remvoed from `PSYoungGen`, resulting in decrease of `PSYoungGen`.
+* Instead of being garbage-collected, the object was moved to `PSOldGen` since there is almost no change in the overall memory(10496K->10398K).
 
 ### [Local Variables Example 2](src/main/java/com/nobodyhub/learn/gc/LocalVarExample2.java)
 This example shows how the GC treats the null local variable.
@@ -42,8 +42,8 @@ This example shows how the GC treats the null local variable.
 package com.nobodyhub.learn.gc;
 
 public class LocalVarExample2 {
-    private int _10MB = 50 * 1024 * 1024;
-    private byte[] memory = new byte[_10MB];
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
 
     public static void main(String[] args) {
         LocalVarExample2 e = new LocalVarExample2();
@@ -63,14 +63,14 @@ GC Completed!
 Instead of moving to `PSOldGen`, `e` was removed directly.
 
 ### [Local Variables Example 3](src/main/java/com/nobodyhub/learn/gc/LocalVarExample3.java)
-This example shows how GC treat the local variable in the method call.
+This example shows how GC treats the local variable in the method call.
 
 ```java
 package com.nobodyhub.learn.gc;
 
 public class LocalVarExample3 {
-    private int _10MB = 50 * 1024 * 1024;
-    private byte[] memory = new byte[_10MB];
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
 
     public static void main(String[] args) {
         method();
@@ -95,8 +95,8 @@ The output will be:
 2nd GC Completed!
 ```
 
-In the 1st GC, `e` was moved from `PSYoungGen` to `PSOldGen`.
-In the 2nd GC, `e` was not held by any object and removed from `PSOldGen` because no method was holding any more.
+* In the 1st GC, `e` was moved from `PSYoungGen` to `PSOldGen`.
+* In the 2nd GC, `e` was not held by any object and removed from `PSOldGen` because no method referred it any more.
 
 ### [Large Object Example](src/main/java/com/nobodyhub/learn/gc/LargeObjectExample.java)
 The example show how GC deal with big object.
@@ -104,8 +104,8 @@ The example show how GC deal with big object.
 package com.nobodyhub.learn.gc;
 
 public class LargeObjectExample {
-    private int _10MB = 500 * 1024 * 1024;
-    private byte[] memory = new byte[_10MB];
+    private int _50MB = 500 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
 
     public static void main(String[] args) {
         LocalVarExample1 e = new LocalVarExample1();
@@ -212,7 +212,23 @@ Even though `e` is not accessable from outside block, it is not garbage-collecet
 ### [Block Variables Example 2](src/main/java/com/nobodyhub/learn/gc/BlockVarExample2.java)
 This example shows how the GC treat variable in the block after set null.
 ```java
+package com.nobodyhub.learn.gc;
 
+public class BlockVarExample2 {
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
+
+    public static void main(String[] args) {
+        {
+            BlockVarExample2 e = new BlockVarExample2();
+            e = null;
+            System.gc();
+            System.out.println("1st GC Completed!");
+        }
+        System.gc();
+        System.out.println("2nd GC Completed!");
+    }
+}
 ```
 This will output:
 ```log
@@ -224,9 +240,6 @@ This will output:
 2nd GC Completed!
 ```
 `e` was garbaged-collected in the minor `GC` in the 1st round.
-
-
-
 
 
 ## Format of GC Log
