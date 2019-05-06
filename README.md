@@ -243,8 +243,131 @@ This will output:
 ```
 `e` was garbaged-collected in the minor `GC` in the 1st round.
 
+### [Block Variables Example 3](src/main/java/com/nobodyhub/learn/gc/BlockVarExample3.java)
+This example shows how the GC treats variable in the loop.
+```java
+public class BlockVarExample3 {
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
+    private final int idx;
 
+    public BlockVarExample3(int idx) {
+        this.idx = idx;
+    }
 
+    public static void main(String[] args) {
+        int i = 1;
+        while (i <= 4) {
+            BlockVarExample3 e = new BlockVarExample3(i);
+            System.gc();
+            System.out.println(i++ + " GC Completed!\n=======");
+        }
+        System.out.println("Final GC Started!=======");
+        System.gc();
+        System.out.println("Final GC Finished!=======");
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        System.out.println("Finalize: " + idx);
+    }
+}
+```
+This will output:
+```log
+[GC [PSYoungGen: 66928K->51504K(458752K)] 66928K->51504K(983040K), 0.0312671 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
+[Full GC (System) [PSYoungGen: 51504K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51504K->51382K(983040K) [PSPermGen: 3376K->3376K(21248K)], 0.0315562 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+1 GC Completed!
+=======
+[GC [PSYoungGen: 74793K->51264K(458752K)] 126175K->102646K(983040K), 0.0281961 secs] [Times: user=0.05 sys=0.02, real=0.03 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->102583K(524288K)] 102646K->102583K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0313642 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+2 GC Completed!
+=======
+Finalize: 1
+[GC [PSYoungGen: 66928K->51264K(458752K)] 169511K->153847K(983040K), 0.0069099 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 102583K->102582K(524288K)] 153847K->102582K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0167252 secs] [Times: user=0.01 sys=0.00, real=0.02 secs] 
+Finalize: 2
+3 GC Completed!
+=======
+[GC [PSYoungGen: 66928K->51264K(458752K)] 169511K->153846K(983040K), 0.0169147 secs] [Times: user=0.00 sys=0.00, real=0.02 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 102582K->102582K(524288K)] 153846K->102582K(983040K) [PSPermGen: 3379K->3378K(21248K)], 0.0167975 secs] [Times: user=0.02 sys=0.00, real=0.02 secs] 
+4 GC Completed!
+=======
+Finalize: 3
+Final GC Started!=======
+[GC [PSYoungGen: 15728K->0K(458752K)] 118311K->102582K(983040K), 0.0066163 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 0K->0K(458752K)] [PSOldGen: 102582K->51382K(524288K)] 102582K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0106614 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+Final GC Finished!=======
+Finalize: 4
+```
+
+||1st GC|2nd GC|3rd GC|4th GC|Final|
+|:-:|:----:|:----:|:----:|:----:|:---:|
+|Young|51504K->0K|51264K->0K|51264K->0K|51264K->0K|0K->0K|
+|Old|0K->51382K|51382K->102583K|102583K->102582K|102582K->102582K|102582K->51382K|
+|Total|51504K->51382K|102646K->102583K|153847K->102582K|153846K->102582K|102582K->51382K|
+|Finalize|||1|2|3|
+
+### [Block Variables Example 4](src/main/java/com/nobodyhub/learn/gc/BlockVarExample4.java)
+This example shows how the GC treats variable in the loop after set null.
+```java
+public class BlockVarExample4 {
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
+    private final int idx;
+
+    public BlockVarExample4(int idx) {
+        this.idx = idx;
+    }
+
+    public static void main(String[] args) {
+        int i = 1;
+        while (i <= 4) {
+            BlockVarExample4 e = new BlockVarExample4(i);
+            e = null;
+            System.gc();
+            System.out.println(i++ + " GC Completed!");
+        }
+        System.out.println("Final GC Started!");
+        System.gc();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        System.out.println("Finalize: " + idx);
+    }
+}
+```
+This will output:
+```log
+[GC [PSYoungGen: 66928K->51472K(458752K)] 66928K->51472K(983040K), 0.0285909 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
+[Full GC (System) [PSYoungGen: 51472K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51472K->51382K(983040K) [PSPermGen: 3376K->3376K(21248K)], 0.0349332 secs] [Times: user=0.02 sys=0.02, real=0.04 secs] 
+1 GC Completed!
+Finalize: 1
+[GC [PSYoungGen: 74793K->51264K(458752K)] 126175K->102646K(983040K), 0.0310401 secs] [Times: user=0.00 sys=0.03, real=0.03 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0097409 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+2 GC Completed!
+Finalize: 2
+[GC [PSYoungGen: 66928K->51264K(458752K)] 118311K->102646K(983040K), 0.0070423 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0093772 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+3 GC Completed!
+Finalize: 3
+[GC [PSYoungGen: 66928K->51264K(458752K)] 118311K->102646K(983040K), 0.0064819 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 51264K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 102646K->51382K(983040K) [PSPermGen: 3379K->3378K(21248K)], 0.0103662 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+Finalize: 4
+4 GC Completed!
+Final GC Started!=======
+[GC [PSYoungGen: 15728K->0K(458752K)] 67111K->51382K(983040K), 0.0003456 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 0K->0K(458752K)] [PSOldGen: 51382K->182K(524288K)] 51382K->182K(983040K) [PSPermGen: 3379K->3379K(21248K)], 0.0037052 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+Final GC Finished!=======
+```
+
+||1st GC|2nd GC|3rd GC|4th GC|Final|
+|:-:|:----:|:----:|:----:|:----:|:---:|
+|Young|51504K->0K|51264K->0K|51264K->0K|51264K->0K|0K->0K|
+|Old|0K->51382K|51382K->102583K|102583K->102582K|102582K->102582K|102582K->51382K|
+|Total|51504K->51382K|102646K->102583K|153847K->102582K|153846K->102582K|102582K->51382K|
+|Finalize||1|2|3|4|
 
 ## Eligibility for Garbage Collection
 > VM Options for example in the section: `-Xms10m -Xmx10m -Xmn10m -XX:+PrintGCDetails`
@@ -274,7 +397,7 @@ public class B {
 }
 ```
 
-### [Eligible Example 1](src/main/java/com/nobodyhub/learn/gc/eligible/GcEligibleExample1.java)
+### [Eligible Example](src/main/java/com/nobodyhub/learn/gc/eligible/GcEligibleExample.java)
 ```java
 public class GcEligibleExample {
 
@@ -315,7 +438,7 @@ finalized: 999
 
 No `OutOfMemoryError` was thrown.
 
-### Non-Eligible
+### [Non Eligible Example](src/main/java/com/nobodyhub/learn/gc/eligible/GcNonEligibleExample.java)
 ```java
 public class GcNonEligibleExample {
 
@@ -373,5 +496,5 @@ Take the following output as an example:
 
 
 ## Environment
-* Java: JDK 1.6.0_45 /
+* Java: JDK 1.6.0_45
 
