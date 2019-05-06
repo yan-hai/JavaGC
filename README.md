@@ -2,8 +2,9 @@
 Use examples to explain the Java GC process.
 
 
-## [GC Root](/GC-Root)
-There are 3 kinds of GC roots in Java:
+## GC Root
+Garbage-collection roots are always reachable and will no be garbage-collected. 
+There are 4 kinds of GC roots in Java:
 * **Local variables**: are kept alive by the stack of a thread. 
 * **Active Java threads**: are always considered as live objects. Especially important for thread local variables
 * **Static variables**: are referenced by their classes. This fact makes them de facto GC roots.
@@ -32,7 +33,7 @@ The output will be:
 GC Completed!
 ```
 In the `Full GC`, `e` was remvoed from `PSYoungGen`, resulting in decrease of `PSYoungGen`.
-Instead of being collected, the object was moved to `PSOldGen` since there is almost no change in the overall memory(10496K->10398K).
+Instead of being garbage-collected, the object was moved to `PSOldGen` since there is almost no change in the overall memory(10496K->10398K).
 
 ### [Local Variables Example 2](src/main/java/com/nobodyhub/learn/gc/LocalVarExample2.java)
 This example shows how the GC treats the null local variable.
@@ -121,7 +122,8 @@ GC Completed!
 ```
 The large object will be directly created in `PSOldGen`.
 
-### [Static Variables Example](src/main/java/com/nobodyhub/learn/gc/StaticVarExample.java)
+### [Class Variables Example 1](src/main/java/com/nobodyhub/learn/gc/ClassVarExample1.java)
+This example shows how the GC treat static variable of class.
 ```java
 package com.nobodyhub.learn.gc;
 
@@ -146,8 +148,86 @@ This will output:
 GC Completed! 
 ```
 
-Because the `e` object was set to null, it was collected during the minor `GC`.
-However, the object held by `StaticVarExample.instance` was not collected and moved to `PSOldGen`
+Because the `e` object was set to null, it was garbage-collected during the minor `GC`.
+However, the object held by `StaticVarExample.instance` was not garbage-collected and moved to `PSOldGen`
+
+### [Class Variables Example 2](src/main/java/com/nobodyhub/learn/gc/ClassVarExample2.java)
+This example shows how the GC treat non-static variable of class.
+```java
+package com.nobodyhub.learn.gc;
+
+public class StaticVarExample {
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
+    private StaticVarExample instance;
+
+    public static void main(String[] args) {
+        StaticVarExample e = new StaticVarExample();
+        e.instance = new StaticVarExample();
+        e = null;
+        System.gc();
+        System.out.println("GC Completed!");
+    }
+}
+```
+This will output:
+```log
+[GC [PSYoungGen: 118128K->288K(458752K)] 118128K->288K(983040K), 0.0005793 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 288K->0K(458752K)] [PSOldGen: 0K->182K(524288K)] 288K->182K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0046023 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+GC Completed!
+```
+Both `e` and `e.instance` were garbaged-collected in the minor `GC`.
+
+### [Block Variables Example 1](src/main/java/com/nobodyhub/learn/gc/BlockVarExample1.java)
+This example shows how the GC treat variable in the block.
+```java
+package com.nobodyhub.learn.gc;
+
+public class BlockVarExample1 {
+    private int _50MB = 50 * 1024 * 1024;
+    private byte[] memory = new byte[_50MB];
+
+    public static void main(String[] args) {
+        {
+            BlockVarExample1 e = new BlockVarExample1();
+            System.gc();
+            System.out.println("1st GC Completed!");
+        }
+        System.gc();
+        System.out.println("2nd GC Completed!");
+    }
+}
+```
+This will output:
+```log
+[GC [PSYoungGen: 66928K->51488K(458752K)] 66928K->51488K(983040K), 0.0280569 secs] [Times: user=0.02 sys=0.02, real=0.03 secs] 
+[Full GC (System) [PSYoungGen: 51488K->0K(458752K)] [PSOldGen: 0K->51382K(524288K)] 51488K->51382K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0316107 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+1st GC Completed!
+[GC [PSYoungGen: 23593K->32K(458752K)] 74975K->51414K(983040K), 0.0002750 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 32K->0K(458752K)] [PSOldGen: 51382K->51382K(524288K)] 51414K->51382K(983040K) [PSPermGen: 3378K->3378K(21248K)], 0.0040275 secs] [Times: user=0.01 sys=0.00, real=0.00 secs] 
+2nd GC Completed!
+```
+Even though `e` is not accessable from outside block, it is not garbage-colleceted.
+
+### [Block Variables Example 2](src/main/java/com/nobodyhub/learn/gc/BlockVarExample2.java)
+This example shows how the GC treat variable in the block after set null.
+```java
+
+```
+This will output:
+```log
+[GC [PSYoungGen: 66928K->288K(458752K)] 66928K->288K(983040K), 0.0008514 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 288K->0K(458752K)] [PSOldGen: 0K->182K(524288K)] 288K->182K(983040K) [PSPermGen: 3375K->3375K(21248K)], 0.0044942 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+1st GC Completed!
+[GC [PSYoungGen: 23593K->32K(458752K)] 23775K->214K(983040K), 0.0001470 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 32K->0K(458752K)] [PSOldGen: 182K->182K(524288K)] 214K->182K(983040K) [PSPermGen: 3378K->3378K(21248K)], 0.0039821 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
+2nd GC Completed!
+```
+`e` was garbaged-collected in the minor `GC` in the 1st round.
+
+
+
+
 
 ## Format of GC Log
 Take the following output as an example:
@@ -170,5 +250,5 @@ Take the following output as an example:
 
 
 ## Environment
-* Java: JDK 1.6.0_45
+* Java: JDK 1.6.0_45 / 
 * VM Options: -Xms1024m -Xmx1024m -Xmn512m -XX:+PrintGCDetails
