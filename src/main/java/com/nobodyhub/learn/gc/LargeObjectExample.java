@@ -1,8 +1,8 @@
 package com.nobodyhub.learn.gc;
 
-public class LocalVarExample1 {
-    private int _50MB = 50 * 1024 * 1024;
-    private byte[] memory = new byte[_50MB];
+public class LargeObjectExample {
+    private int _500MB = 500 * 1024 * 1024;
+    private byte[] memory = new byte[_500MB];
 
     public static void main(String[] args) {
         LocalVarExample1 e = new LocalVarExample1();
