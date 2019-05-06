@@ -9,6 +9,8 @@ There are 4 kinds of GC roots in Java:
 * **Static variables**: are referenced by their classes. This fact makes them de facto GC roots.
 * **JNI References**: are Java ojbects that the native code has created as part of a JNI call.  
 
+> VM Options for example in the section: `-Xms1024m -Xmx1024m -Xmn512m -XX:+PrintGCDetails`
+
 ### [Local Variables Example 1](src/main/java/com/nobodyhub/learn/gc/LocalVarExample1.java)
 This example shows how the GC treats the not-null local variable.
 ```java
@@ -242,6 +244,114 @@ This will output:
 `e` was garbaged-collected in the minor `GC` in the 1st round.
 
 
+
+
+## Eligibility for Garbage Collection
+> VM Options for example in the section: `-Xms10m -Xmx10m -Xmn10m -XX:+PrintGCDetails`
+
+We will create object uisng following class:
+* Class A 
+```java
+public class A {
+}
+```
+* Class B
+```java
+public class B {
+    private double[] array = new double[1 * 1000 * 1000];
+    private int name;
+    private A a;
+
+    public B(int name, A myClassA) {
+        this.name = name;
+        this.a = myClassA;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        System.out.println("finalized: " + name);
+    }
+}
+```
+
+### [Eligible Example 1](src/main/java/com/nobodyhub/learn/gc/eligible/GcEligibleExample1.java)
+```java
+public class GcEligibleExample {
+
+    public static void main(String[] args) {
+        A a = new A();
+
+        System.out.println("--- Loop Start ---");
+        for (int i = 1; i <= 1000; i++) {
+            B b = new B(i, a);
+            System.gc();
+        }
+        System.out.println("--- Loop End ---");
+    }
+}
+```
+This will output:
+```log
+--- Loop Start ---
+[GC [PSYoungGen: 10884K->8100K(89600K)] 10884K->8100K(249344K), 0.0049886 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 8100K->0K(89600K)] [PSOldGen: 0K->7967K(159744K)] 8100K->7967K(249344K) [PSPermGen: 2993K->2993K(21248K)], 0.0079610 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+[GC [PSYoungGen: 13956K->7908K(89600K)] 21923K->15875K(249344K), 0.0049166 secs] [Times: user=0.02 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 7908K->0K(89600K)] [PSOldGen: 7967K->15780K(159744K)] 15875K->15780K(249344K) [PSPermGen: 3016K->3016K(21248K)], 0.0076384 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+finalized: 1
+[GC [PSYoungGen: 12420K->7876K(89600K)] 28201K->23656K(249344K), 0.0012415 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 15780K->23595K(159744K)] 23656K->23595K(249344K) [PSPermGen: 3109K->3109K(21248K)], 0.0082479 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+finalized: 2
+
+...
+
+[GC [PSYoungGen: 10884K->7876K(89600K)] 26758K->23750K(249344K), 0.0019427 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 15873K->23686K(159744K)] 23750K->23686K(249344K) [PSPermGen: 3956K->3956K(21248K)], 0.0065538 secs] [Times: user=0.02 sys=0.00, real=0.01 secs] 
+finalized: 998
+[GC [PSYoungGen: 10884K->7876K(89600K)] 34571K->31562K(249344K), 0.0010782 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 7876K->0K(89600K)] [PSOldGen: 23686K->15873K(159744K)] 31562K->15873K(249344K) [PSPermGen: 3956K->3956K(21248K)], 0.0069604 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+finalized: 999
+--- Loop End ---
+```
+
+No `OutOfMemoryError` was thrown.
+
+### Non-Eligible
+```java
+public class GcNonEligibleExample {
+
+    public static void main(String[] args) {
+        A myClassA = new A();
+        List<B> bList = new ArrayList<B>();
+
+        System.out.println("--- Loop Start ---");
+        for (int i = 1; i <= 1000; i++) {
+            B b = new B(i, myClassA);
+            bList.add(b);
+            System.gc();
+        }
+        System.out.println("--- Loop End ---");
+    }
+}
+```
+This will output:
+
+```log
+--- Loop Start ---
+[GC [PSYoungGen: 10884K->8084K(89600K)] 10884K->8084K(249344K), 0.0053770 secs] [Times: user=0.00 sys=0.00, real=0.01 secs] 
+[Full GC (System) [PSYoungGen: 8084K->0K(89600K)] [PSOldGen: 0K->7967K(159744K)] 8084K->7967K(249344K) [PSPermGen: 2994K->2994K(21248K)], 0.0080318 secs] [Times: user=0.00 sys=0.02, real=0.01 secs] 
+[GC [PSYoungGen: 13956K->7940K(89600K)] 21923K->15907K(249344K), 0.0042028 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC (System) [PSYoungGen: 7940K->0K(89600K)] [PSOldGen: 7967K->15782K(159744K)] 15907K->15782K(249344K) [PSPermGen: 3102K->3102K(21248K)], 0.0078200 secs] [Times: user=0.00 sys=0.01, real=0.01 secs] 
+
+...
+
+[GC-- [PSYoungGen: 70313K->70313K(89600K)] 226747K->226747K(249344K), 0.0019197 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC [PSYoungGen: 70313K->70313K(89600K)] [PSOldGen: 156434K->156415K(159744K)] 226747K->226729K(249344K) [PSPermGen: 3383K->3374K(21248K)], 0.0268972 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space
+    at com.nobodyhub.learn.gc.eligible.GcNonEligibleExample$B.<init>(GcNonEligible.java from InputFileObject:11)
+    at com.nobodyhub.learn.gc.eligible.GcNonEligibleExample.main(GcNonEligible.java from InputFileObject:32)
+```
+`OutOfMemoryError` was thrown and promotion failure happens(@see [GC--](https://stackoverflow.com/questions/1174976/what-does-gc-mean-in-a-java-garbage-collection-log)).
+
 ## Format of GC Log
 Take the following output as an example:
 ```
@@ -252,7 +362,7 @@ Take the following output as an example:
 * **[PSYoungGen: 10512K->0K(458752K)]**: After the GC ran, the young generation, space came down from 10512K to 0K. Total allocated young generation space is 458752K.
 * **[PSOldGen: 10396K->10396K(524288K)]**: After the GC ran the old generation space increased from 0K to 10396K and total allocated old generation space is 524288K.
 * **10512K->10396K(983040K)**: After the GC ran, overall memory came down from 10512K to 10396K. Total allocated memory space is 983040K.
-* **[PSPermGen: 3044K->3044K(21248K)]**: After the GC ran, there was no change in the perm generation.
+* **[PSPermGen: 3044K->3044K(21248K)]**: After the GC ran, there was no change in the perm generation. In Java 8 onwards, it has been renamed to `Metaspace`().
 * **0.0088350 secs**: Time the GC took to complete
 * **[Times: user=0.00 sys=0.00, real=0.01 secs]**: 3 types of time are reported for every single GC event. 
     * **real**: is wall clock time (time from start to finish of the call). This is all elapsed time including time slices used by other processes and time the process spends blocked (for example if it is waiting for I/O to complete).
@@ -263,5 +373,5 @@ Take the following output as an example:
 
 
 ## Environment
-* Java: JDK 1.6.0_45 / 
-* VM Options: -Xms1024m -Xmx1024m -Xmn512m -XX:+PrintGCDetails
+* Java: JDK 1.6.0_45 /
+
