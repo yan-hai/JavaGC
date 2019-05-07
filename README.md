@@ -7,7 +7,7 @@ There are 4 kinds of GC roots in Java:
 * **Local variables**: are kept alive by the stack of a thread. 
 * **Active Java threads**: are always considered as live objects. Especially important for thread local variables
 * **Static variables**: are referenced by their classes. This fact makes them de facto GC roots.
-* **JNI References**: are Java ojbects that the native code has created as part of a JNI call.  
+* **JNI References**: are Java ojbects that the native code has created as part of a JNI call.
 
 > VM Options for example in the section: `-Xms1024m -Xmx1024m -Xmn512m -XX:+PrintGCDetails`
 

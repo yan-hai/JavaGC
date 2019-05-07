@@ -1,7 +1,7 @@
 package com.nobodyhub.learn.reference;
 
 public class MyObject {
-    private int[] array = new int[1000 * 1000];
+    private byte[] _1K = new byte[1000];
     private final String name;
 
     public MyObject(String name) {
