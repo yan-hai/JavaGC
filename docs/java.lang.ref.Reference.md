@@ -15,9 +15,13 @@ Going from strongest to weakest, the different levels of reachability reflect th
 * SoftReference<T>: Soft reference objects, which are cleared at the discretion of the garbage collector in response to memory demand.
 * WeakReference<T>: Weak reference objects, which do not prevent their referents from being made finalizable, finalized, and then reclaimed.
 * PhantomReference<T>: Phantom reference objects, which are enqueued after the collector determines that their referents may otherwise be reclaimed.
+The package provides a queue to store the references after their reachability changes.
 * ReferenceQueue<T>: Reference queues, to which registered reference objects are appended by the garbage collector after the appropriate reachability changes are detected.
 
-## Soft reference vs Normal reference
+## Examples for Soft/Weak Reference
+> If the output of following code sample is not as expect, please try to adjust the VM Options and add `-XX:+PrintGCDetails` to target the cause. 
+
+### Soft reference vs Normal reference
 We will create **soft** reference and **normal** references in the loop.
 
 > VM Options: -Xmx3m -Xms1m
@@ -67,7 +71,7 @@ We kept the **soft** references in a collection so that we can afterward check h
 Keeping an instance of Reference in a collection does not create a strong reference of the underlying object. 
 If we kept the **normal** objects straight in a collection, then for sure we would be creating strong references. 
 
-## Weak reference vs Normal reference
+### Weak reference vs Normal reference
 We will create **weak** reference and **normal** references in the loop.
 
 > VM Options: -Xmx1m -Xms1m
@@ -122,7 +126,7 @@ Reference: null [WeakReference]
 ```
 This time all(or most in some run) of the **weak** references are garbaged-collected as soon as they become unreachable, similar to **normal** objects.
 
-## Soft references vs Weak references
+### Soft references vs Weak references
 We will create both **soft** and **weak** reference in the loop.
 
 > VM Options: -Xmx3m -Xms1m
@@ -177,7 +181,7 @@ Reference: null [WeakReference]
 ```
 All(could be some) **weak** references were garbage collected but soft references were not garbed collected till the end of the execution.
 
-## Soft references vs Weak references vs Normal references
+### Soft references vs Weak references vs Normal references
 We will create **soft**, **weak**, and **normal** references in the loop.
 
 > VM Options: -Xmx3m -Xms3m
@@ -247,7 +251,7 @@ Reference: null [WeakReference]
 **Weak** references and **normal** objects are equally likely to be garbage collected but **soft** references live longer than them.
 
 
-## Soft reference only
+### Soft reference only
 We will create 1000 **soft** references in the loop.
 
 > VM Options: -Xmx3m -Xms3m
