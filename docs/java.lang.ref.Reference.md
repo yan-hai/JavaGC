@@ -18,7 +18,7 @@ Going from strongest to weakest, the different levels of reachability reflect th
 * ReferenceQueue<T>: Reference queues, to which registered reference objects are appended by the garbage collector after the appropriate reachability changes are detected.
 
 ## Soft reference vs Normal reference
-We will create *soft* reference and *normal* references in the loop.
+We will create **soft** reference and **normal** references in the loop.
 
 > VM Options: -Xmx3m -Xms1m
 
@@ -60,15 +60,15 @@ Reference: soft 8 [SoftReference]
 Reference: soft 9 [SoftReference]
 Reference: soft 10 [SoftReference]
 ```
-In the loop we created multiple *soft* references which is wrapped with `SoftReference` and let the underlying references go unreachable when the current loop ends.
-We also created the same object without wrapping in the `SoftReferences`. Those we named it *normal* in this example. 
+In the loop we created multiple **soft** references which is wrapped with `SoftReference` and let the underlying references go unreachable when the current loop ends.
+We also created the same object without wrapping in the `SoftReferences`. Those we named it **normal** in this example. 
 
-We kept the *soft* references in a collection so that we can afterward check how many of them will return null on get() call. 
+We kept the **soft** references in a collection so that we can afterward check how many of them will return null on get() call. 
 Keeping an instance of Reference in a collection does not create a strong reference of the underlying object. 
-If we kept the *normal* objects straight in a collection, then for sure we would be creating strong references. 
+If we kept the **normal** objects straight in a collection, then for sure we would be creating strong references. 
 
 ## Weak reference vs Normal reference
-We will create *weak* reference and *normal* references in the loop.
+We will create **weak** reference and **normal** references in the loop.
 
 > VM Options: -Xmx1m -Xms1m
 
@@ -120,10 +120,10 @@ Reference: null [WeakReference]
 Reference: null [WeakReference]
 Reference: null [WeakReference]
 ```
-This time all(or most in some run) of the *weak* references are garbaged-collected as soon as they become unreachable, similar to *normal* objects.
+This time all(or most in some run) of the **weak** references are garbaged-collected as soon as they become unreachable, similar to **normal** objects.
 
 ## Soft references vs Weak references
-We will create both *soft* and *weak* reference in the loop.
+We will create both **soft** and **weak** reference in the loop.
 
 > VM Options: -Xmx3m -Xms1m
 
@@ -175,11 +175,80 @@ Reference: null [WeakReference]
 Reference: soft 10 [SoftReference]
 Reference: null [WeakReference]
 ```
-All(could be some) *weak* references were garbage collected but soft references were not garbed collected till the end of the execution.
+All(could be some) **weak** references were garbage collected but soft references were not garbed collected till the end of the execution.
+
+## Soft references vs Weak references vs Normal references
+We will create **soft**, **weak**, and **normal** references in the loop.
+
+> VM Options: -Xmx3m -Xms3m
+
+```java
+public class SoftWeakNormalReferenceExample {
+    public static void main(String[] args) {
+        List<Reference<MyObject>> references = new ArrayList<>();
+        IntStream.range(1, 11).forEach(i -> {
+            //soft
+            Reference<MyObject> ref = new SoftReference<>(new MyObject("soft " + i));
+            references.add(ref);
+            // weak
+            ref = new WeakReference<>(new MyObject("weak " + i));
+            references.add(ref);
+            // normal
+            new MyObject("normal " + i);
+        });
+        ReferencePrintUtil.printReferences(references);
+    }
+}
+```
+This will output:
+```log
+Finalizing: weak 3
+Finalizing: normal 2
+Finalizing: weak 2
+Finalizing: normal 1
+Finalizing: weak 1
+Finalizing: weak 6
+Finalizing: normal 5
+Finalizing: weak 5
+Finalizing: normal 4
+Finalizing: weak 4
+Finalizing: normal 3
+Finalizing: normal 8
+Finalizing: weak 8
+Finalizing: normal 7
+Finalizing: weak 7
+Finalizing: normal 6
+Finalizing: normal 10
+Finalizing: weak 10
+Finalizing: normal 9
+Finalizing: weak 9
+-- printing references --
+Reference: soft 1 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 2 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 3 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 4 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 5 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 6 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 7 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 8 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 9 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 10 [SoftReference]
+Reference: null [WeakReference]
+```
+**Weak** references and **normal** objects are equally likely to be garbage collected but **soft** references live longer than them.
 
 
 ## Soft reference only
-We will create 1000 *soft* references in the loop.
+We will create 1000 **soft** references in the loop.
 
 > VM Options: -Xmx3m -Xms3m
 
@@ -218,4 +287,4 @@ Reference: null [SoftReference]
 Reference: null [SoftReference]
 Reference: null [SoftReference]
 ```
-This time some of the *soft* references were garbage collected.
+This time some of the **soft** references were garbage collected.
