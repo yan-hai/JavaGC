@@ -21,7 +21,7 @@ The package provides a queue to store the references after their reachability ch
 ## Examples for Soft/Weak Reference
 > If the output of following code sample is not as expect, please try to adjust the VM Options and add `-XX:+PrintGCDetails` to target the cause. 
 
-### Soft reference vs Normal reference
+### [Soft reference vs Normal reference](../src/main/java/com/nobodyhub/learn/reference/SoftNormalReferenceExample.java)
 We will create **soft** reference and **normal** references in the loop.
 
 > VM Options: -Xmx3m -Xms1m
@@ -71,7 +71,7 @@ We kept the **soft** references in a collection so that we can afterward check h
 Keeping an instance of Reference in a collection does not create a strong reference of the underlying object. 
 If we kept the **normal** objects straight in a collection, then for sure we would be creating strong references. 
 
-### Weak reference vs Normal reference
+### [Weak reference vs Normal reference](../src/main/java/com/nobodyhub/learn/reference/WeakNormalReferenceExample.java)
 We will create **weak** reference and **normal** references in the loop.
 
 > VM Options: -Xmx1m -Xms1m
@@ -126,7 +126,7 @@ Reference: null [WeakReference]
 ```
 This time all(or most in some run) of the **weak** references are garbaged-collected as soon as they become unreachable, similar to **normal** objects.
 
-### Soft references vs Weak references
+### [Soft references vs Weak references](../src/main/java/com/nobodyhub/learn/reference/SoftWeakReferenceExample.java)
 We will create both **soft** and **weak** reference in the loop.
 
 > VM Options: -Xmx3m -Xms1m
@@ -181,7 +181,7 @@ Reference: null [WeakReference]
 ```
 All(could be some) **weak** references were garbage collected but soft references were not garbed collected till the end of the execution.
 
-### Soft references vs Weak references vs Normal references
+### [Soft references vs Weak references vs Normal references](../src/main/java/com/nobodyhub/learn/reference/SoftWeakNormalReferenceExample.java)
 We will create **soft**, **weak**, and **normal** references in the loop.
 
 > VM Options: -Xmx3m -Xms3m
@@ -251,7 +251,7 @@ Reference: null [WeakReference]
 **Weak** references and **normal** objects are equally likely to be garbage collected but **soft** references live longer than them.
 
 
-### Soft reference only
+### [Soft reference only](../src/main/java/com/nobodyhub/learn/reference/SoftReferenceExample.java)
 We will create 1000 **soft** references in the loop.
 
 > VM Options: -Xmx3m -Xms3m
@@ -296,18 +296,12 @@ This time some of the **soft** references were garbage collected.
 
 ## Phantom Reference Example
 
-### Phantom Example 1
+### [Phantom Example](../src/main/java/com/nobodyhub/learn/reference/PhantomReferenceExample.java)
 
 > VM Options: -Xmx1m -Xms1ms
 
 ```java
-package com.nobodyhub.learn.reference;
-
-import java.lang.ref.PhantomReference;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-
-public class PhantomReferenceExample1 {
+public class PhantomReferenceExample {
     public static void main(String[] args) {
         ReferenceQueue<MyObject> queue = new ReferenceQueue<>();
 

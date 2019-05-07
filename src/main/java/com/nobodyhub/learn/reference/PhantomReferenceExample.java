@@ -4,7 +4,7 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 
-public class PhantomReferenceExample1 {
+public class PhantomReferenceExample {
     public static void main(String[] args) {
         ReferenceQueue<MyObject> queue = new ReferenceQueue<>();
 
