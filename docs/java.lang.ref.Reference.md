@@ -66,4 +66,57 @@ We kept the *soft* references in a collection so that we can afterward check how
 Keeping an instance of Reference in a collection does not create a strong reference of the underlying object. 
 If we kept the *normal* objects straight in a collection, then for sure we would be creating strong references. 
 
+# Weak reference vs Normal reference
+
+> VM options: -Xmx1m -Xms1m
+
+```java
+public class WeakNormalReferenceExample {
+    public static void main(String[] args) {
+        List<Reference<MyObject>> references = new ArrayList<>();
+        IntStream.range(1, 11).forEach(i -> {
+            MyObject myObject = new MyObject("weak " + i);
+            Reference<MyObject> ref = new WeakReference<>(myObject);
+            references.add(ref);
+            new MyObject("normal " + i);
+        });
+        ReferencePrintUtil.printReferences(references);
+    }
+}
+```
+This will output:
+```log
+Finalizing: normal 10
+Finalizing: weak 10
+Finalizing: normal 9
+Finalizing: weak 9
+Finalizing: normal 8
+Finalizing: weak 8
+Finalizing: normal 7
+Finalizing: weak 3
+Finalizing: normal 2
+Finalizing: weak 2
+Finalizing: normal 1
+Finalizing: weak 1
+Finalizing: weak 7
+Finalizing: normal 6
+Finalizing: weak 6
+Finalizing: normal 5
+Finalizing: weak 5
+Finalizing: normal 4
+Finalizing: weak 4
+Finalizing: normal 3
+-- printing references --
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+Reference: null [WeakReference]
+```
+This time all(or most in some run) of the *weak* references are garbaged-collected as soon as they become unreachable, similar to *normal* objects.
 
