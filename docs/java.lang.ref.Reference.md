@@ -18,8 +18,9 @@ Going from strongest to weakest, the different levels of reachability reflect th
 * ReferenceQueue<T>: Reference queues, to which registered reference objects are appended by the garbage collector after the appropriate reachability changes are detected.
 
 ## Soft reference vs Normal reference
+We will create *soft* reference and *normal* references in the loop.
 
-> VM options: -Xmx3m -Xms1m
+> VM Options: -Xmx3m -Xms1m
 
 ```java
 public class SoftNormalReferenceExample {
@@ -66,9 +67,10 @@ We kept the *soft* references in a collection so that we can afterward check how
 Keeping an instance of Reference in a collection does not create a strong reference of the underlying object. 
 If we kept the *normal* objects straight in a collection, then for sure we would be creating strong references. 
 
-# Weak reference vs Normal reference
+## Weak reference vs Normal reference
+We will create *weak* reference and *normal* references in the loop.
 
-> VM options: -Xmx1m -Xms1m
+> VM Options: -Xmx1m -Xms1m
 
 ```java
 public class WeakNormalReferenceExample {
@@ -121,6 +123,7 @@ Reference: null [WeakReference]
 This time all(or most in some run) of the *weak* references are garbaged-collected as soon as they become unreachable, similar to *normal* objects.
 
 ## Soft references vs Weak references
+We will create both *soft* and *weak* reference in the loop.
 
 > VM Options: -Xmx3m -Xms1m
 
@@ -173,3 +176,46 @@ Reference: soft 10 [SoftReference]
 Reference: null [WeakReference]
 ```
 All(could be some) *weak* references were garbage collected but soft references were not garbed collected till the end of the execution.
+
+
+## Soft reference only
+We will create 1000 *soft* references in the loop.
+
+> VM Options: -Xmx3m -Xms3m
+
+```java
+public class SoftReferenceExample {
+    public static void main(String[] args) {
+        List<Reference<MyObject>> references = new ArrayList<>();
+        IntStream.range(1, 1001).forEach(i -> {
+            MyObject myObject = new MyObject("soft " + i);
+            Reference<MyObject> ref = new SoftReference<>(myObject);
+            references.add(ref);
+        });
+        ReferencePrintUtil.printReferences(references);
+    }
+}
+```
+This will output:
+```log
+-- printing references --
+Reference: soft 1 [SoftReference]
+Reference: soft 2 [SoftReference]
+Reference: soft 3 [SoftReference]
+Reference: soft 4 [SoftReference]
+Reference: soft 5 [SoftReference]
+Reference: soft 6 [SoftReference]
+Reference: soft 7 [SoftReference]
+
+...
+
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+Reference: null [SoftReference]
+```
+This time some of the *soft* references were garbage collected.
