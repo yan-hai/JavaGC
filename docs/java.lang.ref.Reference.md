@@ -383,6 +383,10 @@ pre-mortem cleanup actions
 |2nd Check|null|not-null|true|
 
 * **ref#get()** will always return *null*
+* **ReferenceQueue#poll()** returns the same ref instance just after `finalize()` method is called. In fact only those References are enqueued which have been finalized already.
 * seems no difference between a **norma** object and **phantom** referenced object with regards to when they are GCed
 
-
+> **[Notes for Phantom Reference](https://www.oracle.com/technetwork/java/javase/9-notes-3745703.html#JDK-8071507)**
+> * Phantom references are automatically cleared as soft and weak references
+>     * This enhancement changes phantom references to be automatically cleared by the garbage collector as soft and weak references.  
+>     * An object becomes phantom reachable after it has been finalized. This change may cause the phantom reachable objects to be GC'ed earlier. Previously, the referent was kept alive until PhantomReference objects were GC'ed. This potential behavioral change might only impact existing code that would depend on PhantomReference being enqueued rather than when the referent was freed from the heap.
