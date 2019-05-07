@@ -120,3 +120,56 @@ Reference: null [WeakReference]
 ```
 This time all(or most in some run) of the *weak* references are garbaged-collected as soon as they become unreachable, similar to *normal* objects.
 
+## Soft references vs Weak references
+
+> VM Options: -Xmx3m -Xms1m
+
+```java
+public class SoftWeakReferenceExample {
+    public static void main(String[] args) {
+        List<Reference<MyObject>> references = new ArrayList<>();
+        IntStream.range(1, 11).forEach(i -> {
+            Reference<MyObject> ref = new SoftReference<>(new MyObject("soft " + i));
+            references.add(ref);
+             ref = new WeakReference<>(new MyObject("weak " + i));
+            references.add(ref);
+        });
+        ReferencePrintUtil.printReferences(references);
+    }
+}
+```
+This will output:
+```log
+Finalizing: weak 1
+Finalizing: weak 2
+Finalizing: weak 3
+Finalizing: weak 9
+Finalizing: weak 10
+Finalizing: weak 6
+Finalizing: weak 7
+Finalizing: weak 8
+Finalizing: weak 4
+Finalizing: weak 5
+-- printing references --
+Reference: soft 1 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 2 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 3 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 4 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 5 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 6 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 7 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 8 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 9 [SoftReference]
+Reference: null [WeakReference]
+Reference: soft 10 [SoftReference]
+Reference: null [WeakReference]
+```
+All(could be some) *weak* references were garbage collected but soft references were not garbed collected till the end of the execution.
