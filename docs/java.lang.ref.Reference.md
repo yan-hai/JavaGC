@@ -292,3 +292,97 @@ Reference: null [SoftReference]
 Reference: null [SoftReference]
 ```
 This time some of the **soft** references were garbage collected.
+
+
+## Phantom Reference Example
+
+### Phantom Example 1
+
+> VM Options: -Xmx1m -Xms1ms
+
+```java
+package com.nobodyhub.learn.reference;
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+
+public class PhantomReferenceExample1 {
+    public static void main(String[] args) {
+        ReferenceQueue<MyObject> queue = new ReferenceQueue<>();
+
+        MyObject obj1 = new MyObject("phantom");
+        Reference<MyObject> ref = new PhantomReference<>(obj1, queue);
+        System.out.println("ref#get()" + ref.get());
+
+        MyObject obj2 = new MyObject("normal");
+
+        obj1 = null;
+        obj2 = null;
+
+        System.out.println("-- 1st Check --");
+        if(checkObjectGced(ref, queue)){
+            takeAction();
+        }
+
+        System.out.println("-- do some memory intensive work --");
+        for (int i = 0; i < 10; i++) {
+            int[] ints = new int[100000];
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+        }
+
+        System.out.println("-- 2nd Check --");
+        if (checkObjectGced(ref, queue)) {
+            takeAction();
+        }
+    }
+
+    private static boolean checkObjectGced(Reference<MyObject> ref, ReferenceQueue<MyObject> queue) {
+        boolean gc = false;
+        System.out.println("-- Checking whether object garbage collection due --");
+        Reference<? extends MyObject> polledRef = queue.poll();
+
+        System.out.println("polledRef: " + polledRef);
+        System.out.println("Is polledRef same: " + (gc = polledRef == ref));
+
+        if (polledRef != null) {
+            System.out.println("Ref#get(): " + polledRef.get());
+        }
+        return gc;
+    }
+
+    private static void takeAction() {
+        System.out.println("pre-mortem cleanup actions");
+    }
+}
+```
+This will output:
+```log
+ref#get(): null
+-- 1st Check --
+-- Checking whether object garbage collection due --
+polledRef: null
+Is polledRef same: false
+-- do some memory intensive work --
+Finalizing: normal
+Finalizing: phantom
+-- 2nd Check --
+-- Checking whether object garbage collection due --
+polledRef: java.lang.ref.PhantomReference@4554617c
+Is polledRef same: true
+ref#get(): null
+pre-mortem cleanup actions
+```
+||ref#get()|polledRef|polledRef == ref|
+|:-:|:-:|:-:|:-:|
+|Initial|null|-|-|
+|1st Check|null|null|false|
+|2nd Check|null|not-null|true|
+
+* **ref#get()** will always return *null*
+* seems no difference between a **norma** object and **phantom** referenced object with regards to when they are GCed
+
+
